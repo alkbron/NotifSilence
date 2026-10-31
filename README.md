@@ -64,3 +64,7 @@ Sources/NotifSilence/
 └── main.swift          # icône, clics, menu, ouverture au démarrage
 build.sh                # construit le bundle .app (signature ad hoc)
 ```
+
+## Licence
+
+[MIT](LICENSE)
