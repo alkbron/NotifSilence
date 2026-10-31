@@ -34,7 +34,7 @@ NotifSilence passe simplement ce volume des alertes à **0 %** en mode silencieu
 
 ## Installation
 
-Prérequis : macOS 13+ et les outils de ligne de commande Xcode (`xcode-select --install`).
+Prérequis : macOS 13+ et **Xcode 26+** (pour compiler l'icône au format Icon Composer). Avec les seuls outils en ligne de commande (`xcode-select --install`), l'app se construit aussi, mais macOS 26+ affichera son icône dans un carré gris.
 
 ```sh
 git clone https://github.com/alkbron/NotifSilence.git
@@ -62,6 +62,9 @@ cd NotifSilence
 Sources/NotifSilence/
 ├── AlertVolume.swift   # lecture / écriture du volume des alertes (AppleScript)
 └── main.swift          # icône, clics, menu, ouverture au démarrage
+Resources/
+├── AppIcon.icon/       # icône au format Icon Composer (macOS 26+)
+└── AppIcon.png         # icône 1024 px de repli (.icns classique)
 build.sh                # construit le bundle .app (signature ad hoc)
 ```
 

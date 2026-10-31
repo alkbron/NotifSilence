@@ -12,8 +12,27 @@ swift build -c release
 BIN="$(swift build -c release --show-bin-path)/$APP_NAME"
 
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/$APP_NAME"
+
+# Icône.
+# 1) Avec Xcode 26+ : Resources/AppIcon.icon (format Icon Composer) compilé par actool.
+#    C'est le seul format que macOS 26+ affiche sans le mettre dans un carré gris.
+# 2) Sinon (outils en ligne de commande seuls) : Resources/AppIcon.png -> AppIcon.icns.
+if xcrun actool Resources/AppIcon.icon --compile "$APP/Contents/Resources" \
+        --platform macosx --minimum-deployment-target 13.0 --app-icon AppIcon \
+        --output-partial-info-plist build/icon-partial.plist >/dev/null 2>&1; then
+    echo "🎨 Icône compilée depuis AppIcon.icon"
+else
+    echo "⚠️  actool indisponible : icône .icns classique (carré gris sur macOS 26+)"
+    ICONSET="build/AppIcon.iconset"
+    rm -rf "$ICONSET" && mkdir -p "$ICONSET"
+    for size in 16 32 128 256 512; do
+        sips -z $size $size Resources/AppIcon.png --out "$ICONSET/icon_${size}x${size}.png" >/dev/null
+        sips -z $((size * 2)) $((size * 2)) Resources/AppIcon.png --out "$ICONSET/icon_${size}x${size}@2x.png" >/dev/null
+    done
+    iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
+fi
 
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -23,6 +42,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>CFBundleName</key>             <string>$APP_NAME</string>
     <key>CFBundleDisplayName</key>      <string>NotifSilence</string>
     <key>CFBundleExecutable</key>       <string>$APP_NAME</string>
+    <key>CFBundleIconFile</key>         <string>AppIcon</string>
+    <key>CFBundleIconName</key>         <string>AppIcon</string>
     <key>CFBundleIdentifier</key>       <string>com.alkbron.notifsilence</string>
     <key>CFBundlePackageType</key>      <string>APPL</string>
     <key>CFBundleShortVersionString</key><string>1.0</string>
